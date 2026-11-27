@@ -1,0 +1,20 @@
+/* GhostPixel - Team TriLogy */
+/* ---------- sandbox ---------- */
+.bits{display:grid;grid-template-columns:2.4em repeat(8,minmax(0,1fr)) 3em;gap:5px;align-items:center;font-size:14px}
+.bits .lab{font:400 22px var(--disp)}
+.bits .hd{text-align:center;color:var(--smoke);font-size:13px}
+.bit{min-height:44px;border:2px solid var(--line2);background:#0a0706;font:500 18px var(--mono);cursor:pointer;display:grid;place-items:center;padding:0;transition:background .12s}
+.bit:hover{border-color:var(--amber)}
+.bit.on{background:var(--paper);color:#140d09}
+.bit.changed{border-color:var(--ember);box-shadow:0 0 12px var(--ember)}
+.bit.lsb{border-style:dashed}
+.val{font:400 22px var(--disp);text-align:right}
+.swatches{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.swatch{height:76px;display:flex;align-items:flex-end;padding:6px;border:2px solid var(--line)}
+.swatch span{background:rgba(13,10,9,.85);padding:3px 7px;font-size:14px;color:var(--paper)}
+.planebtns{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:5px}
+.planebtns button{min-height:44px;background:#0a0706;border:2px solid var(--line2);font:400 23px var(--disp);cursor:pointer}
+.planebtns button:hover{border-color:var(--amber)}
+.planebtns button[aria-pressed=true]{background:var(--ember);color:#fff;border-color:var(--ember)}
+.loupebox{display:grid;grid-template-columns:150px minmax(0,1fr);gap:16px;align-items:center}
+.loupebox canvas{width:150px;height:150px;image-rendering:pixelated;border:2px solid var(--line2);display:block}

@@ -1,0 +1,29 @@
+/* GhostPixel - Team TriLogy */
+/* ---------- challenge ---------- */
+.board{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:22px}
+.board div{background:var(--tray);border:2px solid var(--line);padding:10px 14px}
+.board b{display:block;font:400 46px/1.05 var(--disp)}
+.board span{font-size:14px;color:var(--smoke)}
+.board .you b{color:var(--amber)}.board .bot b{color:var(--ember)}
+@media(max-width:600px){.board{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(12px,2vw,24px)}
+@media(max-width:620px){.cards{grid-template-columns:minmax(0,1fr)}}
+.card{position:relative;background:#e9ddcc;border:0;padding:6px 6px 0;cursor:pointer;line-height:0;text-align:left;box-shadow:0 6px 0 #6f6152,0 24px 40px -20px #000;transition:transform .15s,box-shadow .2s}
+.card:nth-child(1){transform:rotate(-1.4deg)}.card:nth-child(2){transform:rotate(.8deg)}.card:nth-child(3){transform:rotate(-.6deg)}
+.card:hover:not(:disabled){transform:translateY(-6px) rotate(0);box-shadow:0 10px 0 #6f6152,0 0 40px rgba(255,180,61,.45)}
+.card canvas{width:100%;height:auto;display:block;background:#000}
+.card .cv{position:relative;overflow:hidden}
+.card .foot{display:flex;justify-content:space-between;align-items:center;gap:8px;line-height:1.2;padding:8px 4px 9px;color:#3a2c21;font:400 22px var(--disp)}
+.card .sc{font-variant-numeric:tabular-nums;color:#3a2c21}
+.card .marks{display:flex;gap:6px;font:400 17px/1 var(--disp)}
+.card .marks span{padding:4px 6px;color:#fff}
+.card .m-you{background:#b46d0c}.card .m-bot{background:var(--ember-d)}
+.card.guess{outline:4px solid var(--amber);outline-offset:4px}
+.card.carrier{box-shadow:0 6px 0 #6f6152,0 0 0 4px var(--ember),0 0 50px rgba(255,79,94,.6)}
+.card .pop{position:absolute;left:50%;top:40%;width:42%;transform:translate(-50%,-50%);display:none;z-index:2}
+.card.carrier .pop{display:block;animation:popout .8s cubic-bezier(.2,1.7,.4,1)}
+@keyframes popout{0%{transform:translate(-50%,10%) scale(.2);opacity:0}100%{transform:translate(-50%,-50%) scale(1);opacity:1}}
+.card .scan{position:absolute;left:0;right:0;top:0;height:3px;background:var(--amber);box-shadow:0 0 12px 2px var(--amber);display:none}
+.card:disabled{cursor:default}
+.outcome{font:400 clamp(30px,3.6vw,44px)/1.1 var(--disp);margin:24px 0 8px;min-height:1.2em}
+.code{font-family:var(--mono);font-size:15px;background:#0a0706;border:2px dashed var(--line2);padding:10px 12px;overflow-wrap:anywhere;user-select:all}

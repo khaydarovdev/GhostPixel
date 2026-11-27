@@ -1,0 +1,12 @@
+/* GhostPixel - Team TriLogy */
+/* ---------- fx ---------- */
+#fx{position:fixed;inset:0;pointer-events:none;z-index:80;width:100%;height:100%}
+.shake{animation:shake .45s}
+@keyframes shake{10%,90%{transform:translateX(-2px)}20%,80%{transform:translateX(5px)}30%,50%,70%{transform:translateX(-10px)}40%,60%{transform:translateX(10px)}}
+.toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,20px);background:var(--paper);color:#1b0f04;padding:11px 18px;font:400 20px var(--disp);z-index:70;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;max-width:80vw;box-shadow:0 5px 0 #6f6152}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}body::after{animation:none}}
+
+/* start-up error (engine could not load) */
+.booterr{position:sticky;top:0;z-index:100;display:flex;flex-direction:column;gap:4px;padding:14px max(3vw,16px);background:var(--ember);color:#1b0f04;font-size:16px}
+.booterr b{font:400 24px/1 var(--disp)}

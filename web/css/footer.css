@@ -1,0 +1,5 @@
+/* GhostPixel - Team TriLogy */
+/* ---------- footer ---------- */
+footer{position:relative;z-index:1;border-top:2px solid var(--line);padding:30px max(3vw,16px) 120px;color:var(--smoke);font-size:15px}
+footer .cols{max-width:1320px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(15em,1fr));gap:24px}
+footer b{color:var(--paper);font:400 24px var(--disp);display:block;margin-bottom:6px}
