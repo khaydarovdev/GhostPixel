@@ -1,0 +1,30 @@
+/* GhostPixel - Team TriLogy */
+/* ---------- controls ---------- */
+label.f,.f{display:block;font-size:15px;color:var(--smoke);margin-bottom:6px}
+input[type=text],input[type=password],textarea,select{width:100%;font-size:16px;padding:11px 13px;background:#0a0706;border:2px solid var(--line);border-radius:0;min-height:46px;color:var(--paper);transition:border-color .15s,box-shadow .15s}
+input:focus,textarea:focus,select:focus{outline:0;border-color:var(--amber);box-shadow:0 0 0 3px rgba(255,180,61,.18),0 0 24px var(--amber-g)}
+textarea{min-height:110px;resize:vertical;line-height:1.45}
+.btn{position:relative;display:inline-flex;white-space:nowrap;align-items:center;justify-content:center;gap:9px;min-height:48px;padding:10px 20px;border:2px solid #2a1702;background:var(--amber);color:#1b0f04;font:400 23px/1 var(--disp);cursor:pointer;box-shadow:0 5px 0 var(--amber-d);transition:transform .08s,box-shadow .15s,background .15s;margin-bottom:5px;border-radius:0}
+.btn:hover{background:#ffc35f;box-shadow:0 6px 0 var(--amber-d),0 0 30px rgba(255,180,61,.45);transform:translateY(-1px)}
+.btn:active{transform:translateY(5px);box-shadow:0 0 0 var(--amber-d),0 0 30px rgba(255,180,61,.45)}
+.btn.alt{background:var(--tray2);color:var(--paper);border-color:var(--line2);box-shadow:0 5px 0 #000}
+.btn.alt:hover{border-color:var(--amber);box-shadow:0 6px 0 #000,0 0 26px var(--amber-g)}
+.btn.alt:active{box-shadow:0 0 0 #000}
+.btn.alt[aria-pressed=true]{border-color:var(--amber);color:var(--amber);box-shadow:0 5px 0 #000,inset 0 0 18px rgba(255,180,61,.2)}
+.btn.danger{background:var(--ember);box-shadow:0 5px 0 var(--ember-d)}
+.btn.small{min-height:42px;font-size:20px;padding:8px 14px}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:0 5px 0 #000}
+.seg{display:inline-flex;flex-wrap:wrap;border:2px solid var(--line);background:#0a0706}
+.seg button{border:0;background:none;color:var(--smoke);padding:9px 13px;min-height:44px;cursor:pointer;font:400 20px/1.1 var(--disp);text-align:left}
+.seg button small{display:block;font:13px var(--body);color:var(--smoke);opacity:.85}
+.seg button:hover{color:var(--paper)}
+.seg button[aria-pressed=true]{background:var(--amber);color:#1b0f04}
+.seg button[aria-pressed=true] small{color:#4a2c08}
+input[type=range]{width:100%;accent-color:var(--amber);min-height:34px;cursor:pointer}
+.check{display:flex;align-items:center;gap:10px;min-height:44px;cursor:pointer;font-size:16px}
+.check input{width:22px;height:22px;accent-color:var(--amber)}
+.msg{font-size:16px;padding:10px 14px;border-left:5px solid var(--line2);background:var(--tray)}
+.msg:empty{display:none}
+.msg.ok{border-color:var(--ok)}
+.msg.err{border-color:var(--ember)}
+.msg.warn{border-color:var(--amber)}

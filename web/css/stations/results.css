@@ -1,0 +1,15 @@
+/* GhostPixel - Team TriLogy */
+/* ---------- results ---------- */
+.chart .r{display:grid;grid-template-columns:minmax(8em,12em) minmax(0,1fr) 4.4em;gap:14px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.chart .r .lab{font-size:16px}
+.chart .r .lab small{display:block;color:var(--smoke);font-size:13px}
+.chart .track{height:34px;background:#1a1411;position:relative;overflow:hidden}
+.chart .track i{position:absolute;inset:0 auto 0 0;width:0;background:repeating-linear-gradient(90deg,var(--ember) 0 calc(100%/19 - 3px),transparent calc(100%/19 - 3px) calc(100%/19));background-size:calc(100% * 19 / var(--n,19)) 100%;transition:width 1.2s cubic-bezier(.2,.8,.2,1)}
+.chart .track i.clean{background:var(--ok)}
+.chart .num{font:400 36px var(--disp);text-align:right}
+.chart .zero{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--ok)}
+@media(max-width:600px){.chart .r{grid-template-columns:minmax(0,1fr) 4em}.chart .track{grid-column:1/-1;grid-row:2}}
+.scope{display:grid;grid-template-columns:repeat(auto-fit,minmax(16em,1fr));gap:18px 28px;margin-top:10px;padding:0;list-style:none}
+.scope li{padding-left:16px;border-left:3px solid var(--line2)}
+.scope b{font:400 24px var(--disp);display:block;margin-bottom:4px;color:var(--paper)}
+.scope span{color:var(--smoke);font-size:16px}

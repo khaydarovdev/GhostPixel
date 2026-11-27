@@ -1,0 +1,12 @@
+/* GhostPixel - Team TriLogy */
+/* ---------- meters & numbers ---------- */
+.meter{display:grid;grid-template-columns:repeat(32,minmax(0,1fr));gap:3px;height:22px}
+.meter i{background:#241b16;transition:background .2s,box-shadow .2s}
+.meter i.on{background:var(--amber);box-shadow:0 0 10px var(--amber-g)}
+.meter.over i.on{background:var(--ember);box-shadow:0 0 10px var(--ember)}
+.meter i.spark{animation:spark .35s}
+@keyframes spark{50%{background:#fff;box-shadow:0 0 14px #fff}}
+.bigsay{font:400 clamp(38px,4.6vw,54px)/1 var(--disp)}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(9.5em,1fr));gap:14px}
+.facts div b{display:block;font:400 36px/1.05 var(--disp);color:var(--paper)}
+.facts div span{font-size:14px;color:var(--smoke)}

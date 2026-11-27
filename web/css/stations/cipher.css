@@ -1,0 +1,15 @@
+/* GhostPixel - Team TriLogy */
+/* ---------- cipher ---------- */
+.hexrow{display:flex;flex-wrap:wrap;gap:3px;font:13px var(--mono)}
+.hexrow span{width:2.5em;text-align:center;padding:3px 0;background:#0a0706;border:1px solid var(--line)}
+.hexrow span.k{background:rgba(255,180,61,.2);border-color:var(--amber)}
+.typed{min-height:56px;padding:12px;background:#0a0706;border:2px solid var(--line);font:400 27px/1.4 var(--disp);overflow-wrap:anywhere;letter-spacing:.02em}
+.typed .q{color:var(--line2)}
+.typed .bad{color:var(--ember)}
+.ticker{font:400 clamp(52px,7.6vw,82px)/1 var(--disp);color:var(--amber);text-shadow:0 0 24px var(--amber-g);font-variant-numeric:tabular-nums}
+.hint{font-size:15px;color:var(--amber);min-height:1.4em}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line)}
+th{color:var(--smoke);font-weight:500}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.scroll{overflow-x:auto}

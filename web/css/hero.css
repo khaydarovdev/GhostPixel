@@ -1,0 +1,16 @@
+/* GhostPixel - Team TriLogy */
+/* ---------- hero ---------- */
+.hero{position:relative;z-index:1;max-width:1320px;margin:0 auto;padding:clamp(28px,5vw,64px) max(3vw,16px) clamp(20px,3vw,40px);display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:clamp(24px,4vw,56px);align-items:center}
+.hero h1{font-size:clamp(58px,9.4vw,124px);line-height:.92}
+.hero h1 .glowline{color:var(--amber);text-shadow:0 0 28px rgba(255,180,61,.45)}
+.hero .lead{font-size:clamp(18px,1.6vw,21px);color:var(--smoke);margin:20px 0 26px;max-width:46ch}
+.hero .row{gap:14px}
+.tray{position:relative;aspect-ratio:5/4;display:grid;place-items:center}
+.tray .print{position:absolute;width:74%;transform:rotate(-4deg);box-shadow:0 0 0 8px #e9ddcc,0 30px 60px -18px #000,0 0 90px -10px rgba(255,180,61,.35);line-height:0}
+.tray .print canvas{width:100%;height:auto;display:block}
+.tray .print2{transform:rotate(5deg) translate(14%,10%);width:56%;filter:brightness(.5) sepia(.6)}
+.tray .heroghost{position:absolute;left:4%;top:-2%;width:clamp(120px,17vw,210px);cursor:pointer;z-index:3}
+.tray .heroghost:hover .ghost{filter:drop-shadow(0 0 26px rgba(241,246,238,.7))}
+.tray .note{position:absolute;right:2%;bottom:2%;z-index:3;background:var(--tray);border:2px solid var(--line);padding:8px 12px;font-size:14px;color:var(--smoke);max-width:240px;line-height:1.35}
+.tray .note b{color:var(--amber);font:400 19px var(--disp)}
+@media(max-width:760px){.hero{grid-template-columns:minmax(0,1fr)}.tray{max-width:520px;width:100%;margin:0 auto}}

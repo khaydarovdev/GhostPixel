@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GhostPixel: the haunted darkroom</title>
+<meta name="description" content="GhostPixel by Team TriLogy: hide a password-protected message in a photo's least significant bits, reveal it, and detect hidden data. The C++ core runs in your browser as WebAssembly.">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jersey+15&family=Schibsted+Grotesk:wght@400..700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+<!-- styles: tokens and base first, then layout, components and stations -->
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/header.css">
+<link rel="stylesheet" href="css/hero.css">
+<link rel="stylesheet" href="css/layout.css">
+<link rel="stylesheet" href="css/controls.css">
+<link rel="stylesheet" href="css/picker.css">
+<link rel="stylesheet" href="css/stage.css">
+<link rel="stylesheet" href="css/meters.css">
+<link rel="stylesheet" href="css/stations/reveal.css">
+<link rel="stylesheet" href="css/stations/detect.css">
+<link rel="stylesheet" href="css/stations/challenge.css">
+<link rel="stylesheet" href="css/stations/sandbox.css">
+<link rel="stylesheet" href="css/stations/destroy.css">
+<link rel="stylesheet" href="css/stations/cipher.css">
+<link rel="stylesheet" href="css/stations/results.css">
+<link rel="stylesheet" href="css/footer.css">
+<link rel="stylesheet" href="css/ghost.css">
+<link rel="stylesheet" href="css/effects.css">
+
+<!-- engine: the C++ core (wasm/ghostpixel.wasm) and browser file formats -->
+<!-- app: interface code, one file per concern; main.js starts everything -->
+<script defer src="js/engine/png-codec.js"></script>
+<script defer src="js/engine/ghostpixel-engine.js"></script>
+<script defer src="js/app/util.js"></script>
+<script defer src="js/app/ghost.js"></script>
+<script defer src="js/app/sound.js"></script>
+<script defer src="js/app/fx.js"></script>
+<script defer src="js/app/images.js"></script>
+<script defer src="js/app/picker.js"></script>
+<script defer src="js/app/router.js"></script>
+<script defer src="js/app/stations/hide.js"></script>
+<script defer src="js/app/stations/reveal.js"></script>
+<script defer src="js/app/stations/detect.js"></script>
+<script defer src="js/app/stations/heatmap.js"></script>
+<script defer src="js/app/stations/challenge.js"></script>
+<script defer src="js/app/stations/sandbox.js"></script>
+<script defer src="js/app/stations/destroy.js"></script>
+<script defer src="js/app/stations/cipher.js"></script>
+<script defer src="js/app/stations/results.js"></script>
+<script defer src="js/app/main.js"></script>
+</head>
+<body>
+<header class="top">
+  <div class="bar">
+    <button class="brand" id="brand" aria-label="GhostPixel, back to the top"><span class="gw" data-ghost></span><b>GhostPixel</b></button>
+    <nav class="tabs" id="tabs" aria-label="Stations">
+      <button data-v="hide">Hide</button>
+      <button data-v="reveal">Reveal</button>
+      <button data-v="detect">Detect</button>
+      <button data-v="challenge" class="star">Challenge</button>
+      <button data-v="sandbox">LSB sandbox</button>
+      <button data-v="destroy">Destroy the ghost</button>
+      <button data-v="crack">Break the cipher</button>
+      <button data-v="results">Our results</button>
+    </nav>
+    <button class="iconbtn" id="soundBtn" aria-label="Sound on" title="Sound on or off"></button>
+  </div>
+</header>
+
+<section class="hero" aria-label="Introduction">
+  <div>
+    <h1>A ghost lives in the <span class="glowline">last bit</span> of every pixel.</h1>
+    <p class="lead">GhostPixel hides a password-protected message inside a photo by nudging colours one step out of 255. Your eyes can't see it. Our detector usually can. Come poke at both.</p>
+    <div class="row">
+      <button class="btn" data-go="challenge">Play the challenge</button>
+      <button class="btn alt" data-go="hide">Hide a message</button>
+    </div>
+  </div>
+  <div class="tray" aria-hidden="true">
+    <div class="print print2"><canvas id="heroB"></canvas></div>
+    <div class="print"><canvas id="heroA"></canvas></div>
+    <span class="heroghost gw" data-ghost id="heroGhost"></span>
+    <div class="note"><b>Same photo twice.</b><br>The front print is carrying a secret. Find it in Detect.</div>
+  </div>
+</section>
+
+<main id="main">
+
+<!-- ============================ HIDE ============================ -->
+<section class="station" id="v-hide" aria-labelledby="h-hide">
+  <div class="head"><div><h2 id="h-hide">Hide a message</h2><p>Pick a photo, type a secret and a password. The secret is encrypted, then written one bit at a time into the lowest bit of each colour, from the top-left pixel.</p></div></div>
+  <div class="split">
+    <div>
+      <div class="stage compare" id="hStage">
+        <canvas id="hBefore"></canvas>
+        <canvas id="hAfter" class="layer"></canvas>
+        <canvas id="hGlow" class="layer glowcv"></canvas>
+        <div class="handle" id="hHandle"><i></i></div>
+        <span class="tag" style="left:10px">Original</span><span class="tag" style="right:10px" id="hAfterTag">With secret</span>
+      </div>
+      <div class="row" style="justify-content:space-between">
+        <button class="btn alt small" id="hGhostBtn" aria-pressed="false" disabled>See the ghost</button>
+        <span class="cap" id="hCap">Drag across the photo to compare.</span>
+      </div>
+      <div id="hLoupeBox" hidden style="margin-top:16px">
+        <span class="f">Top-left corner, 10× magnified. Every lit square is a pixel whose colour moved by exactly one step.</span>
+        <div class="loupe"><canvas id="hLoupe"></canvas></div>
+      </div>
+    </div>
+    <div class="rail">
+      <div class="group picker" id="hPick"></div>
+      <div class="group">
+        <div class="row" style="justify-content:space-between;margin-bottom:6px"><label class="f" for="hMsg" style="margin:0">Secret message</label><button class="btn alt small" id="hFill">Fill to the brim</button></div>
+        <textarea id="hMsg" maxlength="2000000">Meet me at the old lighthouse at midnight. Bring the lantern.</textarea>
+        <div style="margin-top:12px">
+          <div class="meter" id="hMeter" aria-hidden="true"></div>
+          <div class="cap" id="hMeterTxt"></div>
+        </div>
+      </div>
+      <div class="group">
+        <label class="f" for="hPw">Password</label>
+        <div class="row nw"><input type="password" id="hPw" autocomplete="new-password" value="" placeholder="something only your friend knows"><button class="btn alt small" id="hPwShow" aria-pressed="false">Show</button></div>
+        <div class="row" style="margin-top:16px"><button class="btn" id="hGo">Hide it</button></div>
+        <div class="msg" id="hNote" role="status" style="margin-top:12px"></div>
+      </div>
+      <div class="group" id="hAfterBox" hidden>
+        <div class="facts" id="hFacts"></div>
+        <div class="row" style="margin-top:16px">
+          <button class="btn alt small" id="hPng">Save PNG</button>
+          <button class="btn alt small" id="hBmp">Save BMP for the C++ tool</button>
+          <button class="btn small" data-go="reveal">Try revealing it</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ REVEAL ============================ -->
+<section class="station" id="v-reveal" aria-labelledby="h-reveal">
+  <div class="head"><div><h2 id="h-reveal">Reveal a message</h2><p>GhostPixel reads the plain "GPX1" header first, then decrypts with your password. A checksum tells a right password from a wrong one. Three tries, like the console app.</p></div></div>
+  <div class="split">
+    <div>
+      <div class="stage"><canvas id="rCanvas"></canvas></div>
+      <p class="cap" id="rInfo"></p>
+    </div>
+    <div class="rail">
+      <div class="group picker" id="rPick"></div>
+      <div class="group">
+        <div class="row" style="justify-content:space-between;margin-bottom:6px"><label class="f" for="rPw" style="margin:0">Password</label><div class="tries" id="rTries" aria-label="Tries left"></div></div>
+        <form class="row nw" id="rForm"><input type="password" id="rPw" autocomplete="off"><button class="btn" id="rGo" type="submit">Reveal</button></form>
+        <p class="hint" id="rHint" style="margin-top:8px"></p>
+        <div class="msg" id="rNote" role="status"></div>
+      </div>
+      <div class="group">
+        <span class="f">The message</span>
+        <div class="secret" id="rSecret" aria-live="polite"></div>
+        <div class="row" style="margin-top:12px"><button class="btn alt small" id="rCopy" disabled>Copy</button><button class="btn alt small" id="rSave" disabled>Save as .txt</button></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ DETECT ============================ -->
+<section class="station" id="v-detect" aria-labelledby="h-detect">
+  <div class="head"><div><h2 id="h-detect">Detect hidden data</h2><p>No password needed. The scan checks for our signature, then runs two statistical tests (RS analysis and the chi-square attack) on growing bands from the top. A band only counts when both tests agree.</p></div></div>
+  <div class="split">
+    <div>
+      <div class="stage" id="dStage">
+        <canvas id="dCanvas"></canvas>
+        <canvas id="dHeat" class="layer heat"></canvas>
+        <div class="scanband" id="dBand"></div>
+        <div class="scanline" id="dLine"></div>
+      </div>
+      <div class="hlegend"><span>clean</span><i></i><span>suspicious</span><b></b><span>GhostPixel payload</span></div>
+      <p class="cap">Each block is tested on its own. Blocks glow amber, then red, where the lowest bits look tampered with. Hover or tap a block to read its score.</p>
+    </div>
+    <div class="rail">
+      <div class="group picker" id="dPick"></div>
+      <div class="group">
+        <label class="check"><input type="checkbox" id="dStats"> Statistics only: ignore the GPX1 signature</label>
+        <div class="row" style="margin-top:10px"><button class="btn" id="dGo">Scan it</button></div>
+      </div>
+      <div class="group">
+        <svg class="gauge" id="dGauge" viewBox="0 0 240 150" role="img" aria-label="Suspicion score"></svg>
+        <div style="margin-top:6px"><span class="verdict v-idle" id="dVerdict">Not scanned yet</span></div>
+        <p class="small muted" id="dSum" style="margin-top:14px"></p>
+      </div>
+      <div class="group">
+        <div class="bands" id="dBands"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ CHALLENGE ============================ -->
+<section class="station" id="v-challenge" aria-labelledby="h-challenge">
+  <div class="head">
+    <div><h2 id="h-challenge">Find the ghost</h2><p>Three prints of the same photo. One carries a hidden GhostPixel message. Pick it, then watch our detector take its own guess. It plays blindfolded: the signature check is off, so it has only statistics.</p></div>
+  </div>
+  <div class="board" id="cBoard"></div>
+  <div class="row" style="justify-content:space-between;align-items:flex-end;margin-bottom:20px;gap:16px">
+    <div>
+      <span class="f">Difficulty: how much is hidden</span>
+      <div class="seg" id="cLevel" role="group" aria-label="Difficulty"></div>
+    </div>
+    <div class="row">
+      <button class="btn alt small" id="cGoggles" aria-pressed="false">LSB goggles</button>
+      <button class="btn small" id="cNext">New round</button>
+    </div>
+  </div>
+  <div class="cards" id="cCards"></div>
+  <div class="outcome" id="cOutcome" aria-live="polite"></div>
+  <p class="muted" id="cDetail"></p>
+  <div class="split even" style="margin-top:26px">
+    <div class="rail">
+      <div class="group">
+        <h3>Dare a friend</h3>
+        <p class="small muted" style="margin-top:6px">Share this round as a code. Your friend gets the same photo, the same hidden message in the same print, and the same detector.</p>
+        <div class="code" id="cCode"></div>
+        <div class="row" style="margin-top:12px"><button class="btn alt small" id="cCopy">Copy code</button></div>
+      </div>
+      <div class="group">
+        <label class="f" for="cPaste">Got a code from a friend?</label>
+        <form class="row nw" id="cPlayForm"><input type="text" id="cPaste" placeholder="paste it here" autocomplete="off" spellcheck="false"><button class="btn small" type="submit">Play it</button></form>
+        <div class="msg" id="cPasteNote"></div>
+      </div>
+    </div>
+    <div class="rail">
+      <div class="group">
+        <h3>Hide your own</h3>
+        <p class="small muted" style="margin-top:6px">Write a secret for a friend. The code carries it encrypted, so they need your password to read it after they find it.</p>
+        <label class="f" for="cmMsg" style="margin-top:10px">Secret (up to 300 characters)</label>
+        <input type="text" id="cmMsg" maxlength="300" placeholder="I owe you a coffee">
+        <label class="f" for="cmPw" style="margin-top:10px">Password</label>
+        <input type="text" id="cmPw" placeholder="tell your friend separately" autocomplete="off">
+        <label class="f" for="cmPhoto" style="margin-top:10px">Photo</label>
+        <select id="cmPhoto"><option value="0">Coffee</option><option value="1">Cat</option><option value="2">Rocket</option></select>
+        <div class="row" style="margin-top:14px"><button class="btn small" id="cmGo">Make the challenge</button></div>
+        <div class="msg" id="cmNote"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ SANDBOX ============================ -->
+<section class="station" id="v-sandbox" aria-labelledby="h-sandbox">
+  <div class="head"><div><h2 id="h-sandbox">LSB sandbox</h2><p>Each colour is one byte: eight bits. GhostPixel only ever touches the rightmost one. Click a pixel and flip its bits, or flip one bit in every pixel at once, and see when your eye starts to notice.</p></div></div>
+  <div class="split">
+    <div>
+      <div class="stage" style="cursor:crosshair"><canvas id="sCanvas"></canvas><canvas id="sMark" class="layer"></canvas></div>
+      <p class="cap">Tap or click anywhere on the photo to zoom into that pixel.</p>
+    </div>
+    <div class="rail">
+      <div class="group picker" id="sPick"></div>
+      <div class="group">
+        <div class="loupebox"><canvas id="sLoupe" width="15" height="15"></canvas><div><h3 id="sXY">Pixel 0, 0</h3><p class="small muted" id="sWhere" style="margin-top:6px"></p></div></div>
+      </div>
+      <div class="group">
+        <div class="bits" id="sBits"></div>
+        <div class="swatches" style="margin-top:12px"><div class="swatch" id="sSwA"><span>before</span></div><div class="swatch" id="sSwB"><span>now</span></div></div>
+        <p class="hint" id="sNote" style="margin-top:10px"></p>
+      </div>
+      <div class="group">
+        <span class="f">Flip one bit in every colour of every pixel</span>
+        <div class="planebtns" id="sPlanes"></div>
+        <div class="row" style="margin-top:12px"><button class="btn alt small" id="sReset">Reset the photo</button></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ DESTROY ============================ -->
+<section class="station" id="v-destroy" aria-labelledby="h-destroy">
+  <div class="head"><div><h2 id="h-destroy">Destroy the ghost</h2><p>The message lives at exact bit positions, so ordinary editing kills it. Move any slider and the reveal re-runs live with the right password.</p></div></div>
+  <div class="split">
+    <div>
+      <div class="stage"><canvas id="xCanvas"></canvas></div>
+      <p class="cap" id="xCap"></p>
+    </div>
+    <div class="rail">
+      <div class="group"><div class="msg" id="xSrc"></div></div>
+      <div class="group">
+        <label class="f" for="xJpeg">Save as JPEG, quality <b id="xJpegV">off</b></label><input type="range" id="xJpeg" min="10" max="101" value="101">
+        <label class="f" for="xSize" style="margin-top:10px">Resize to <b id="xSizeV">100%</b></label><input type="range" id="xSize" min="40" max="160" value="100">
+        <label class="f" for="xCrop" style="margin-top:10px">Crop from the left <b id="xCropV">0 px</b></label><input type="range" id="xCrop" min="0" max="30" value="0">
+        <div class="row" style="margin-top:10px"><button class="btn alt small" id="xReset">Undo all damage</button></div>
+      </div>
+      <div class="group">
+        <div class="row" style="justify-content:space-between;margin-bottom:10px"><span class="f" style="margin:0">Payload bits still in place</span><span class="verdict v-clean" id="xVerdict" style="font-size:18px">Alive</span></div>
+        <div class="life" id="xLife"><i style="width:100%"></i></div>
+        <p class="small muted" id="xBits" style="margin-top:6px"></p>
+        <span class="f" style="margin-top:12px">What Reveal reads now</span>
+        <div class="garble alive" id="xOut"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ CRACK ============================ -->
+<section class="station" id="v-crack" aria-labelledby="h-crack">
+  <div class="head"><div><h2 id="h-crack">Break the cipher</h2><p>Our README says it plainly: the cipher is for learning, not for real secrets. Here are two ways to break it, run on GhostPixel's own cipher code.</p></div></div>
+  <div class="split even">
+    <div class="rail">
+      <div class="group">
+        <h3>Puzzle 1: two ghosts, one password</h3>
+        <p class="small muted" style="margin-top:6px">The key stream depends only on the password, so two messages hidden with the same password share it. Guess ghost A's message and ghost B decodes itself, letter by letter, with no password at all.</p>
+      </div>
+      <div class="group">
+        <span class="f">Ghost A, encrypted</span><div class="hexrow" id="kA"></div>
+        <span class="f" style="margin-top:10px">Ghost B, encrypted</span><div class="hexrow" id="kB"></div>
+        <label class="f" for="kGuess" style="margin-top:14px">Your guess for ghost A's message</label>
+        <input type="text" id="kGuess" autocomplete="off" spellcheck="false" placeholder="start typing">
+        <span class="f" style="margin-top:12px">Ghost B, decrypted with the key stream your guess implies</span>
+        <div class="typed" id="kOut"></div>
+        <p class="hint" id="kHint" style="margin-top:8px"></p>
+        <div class="row"><button class="btn alt small" id="kHintBtn">Give me a hint</button><button class="btn alt small" id="kNew">New pair</button></div>
+      </div>
+    </div>
+    <div class="rail">
+      <div class="group">
+        <h3>Puzzle 2: the password oracle</h3>
+        <p class="small muted" style="margin-top:6px">Reveal knows instantly whether a password is right, thanks to the checksum. So a program can try passwords as fast as it likes. This ghost's password is three lowercase letters.</p>
+      </div>
+      <div class="group">
+        <form class="row nw" id="bForm"><input type="text" id="bGuess" maxlength="12" placeholder="your guess" autocomplete="off" spellcheck="false"><button class="btn" type="submit">Try</button></form>
+        <p class="hint" id="bHint" style="margin-top:8px"></p>
+        <div class="row"><button class="btn alt small" id="bHintBtn">Give me a hint</button><button class="btn alt small" id="bBrute">Try all 17,576</button><button class="btn alt small" id="bNew">New ghost</button></div>
+        <div class="ticker" id="bTick" style="margin-top:14px">???</div>
+        <p class="small muted" id="bStat"></p>
+        <div class="secret" id="bOut" style="min-height:70px;font-size:19px"></div>
+        <div class="scroll" style="margin-top:14px"><table id="bTable"><thead><tr><th>Password made of</th><th class="n">Possibilities</th><th class="n">Time to try them all</th></tr></thead><tbody></tbody></table></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ RESULTS ============================ -->
+<section class="station" id="v-results" aria-labelledby="h-results">
+  <div class="head"><div><h2 id="h-results">0 of 19 clean photos flagged</h2><p>Our measurements with the C++ build, statistics only (no signature). Random data was written into the lowest bits from the top, the way an unknown tool would, at three sizes.</p></div></div>
+  <div class="split">
+    <div>
+      <span class="f">Photos flagged as suspicious (score 70 or more), out of 19</span>
+      <div class="chart" id="resChart"></div>
+      <p class="small muted" style="margin-top:12px">The highest score on a clean photo was 21. The misses were a logo and a black-and-white silhouette: flat graphics, where these statistics are known to struggle.</p>
+    </div>
+    <div class="rail">
+      <div class="group">
+        <h3>Live check in your browser</h3>
+        <p class="small muted" style="margin-top:6px">The same detector, run right now on the three sample photos (downscaled for this page).</p>
+        <div class="scroll"><table id="resLive"><thead><tr><th>Photo</th><th class="n">Clean</th><th class="n">5%</th><th class="n">25%</th><th class="n">100%</th></tr></thead><tbody></tbody></table></div>
+      </div>
+    </div>
+  </div>
+  <h3 style="margin-top:36px">Honest scope</h3>
+  <ul class="scope">
+    <li><b>The cipher is for learning</b><span>XOR with a password-seeded stream. Fine for a class project, breakable by anyone with the code and a few samples, as Break the cipher shows.</span></li>
+    <li><b>Detection is a score, not proof</b><span>Noisy photos can push a clean image up. A very short message from another tool can stay under the radar.</span></li>
+    <li><b>Our own messages are easy to spot</b><span>On purpose: the plain GPX1 header lets Reveal tell "no message" from "wrong password".</span></li>
+    <li><b>Editing kills the message</b><span>JPEG, resizing, cropping or recolouring destroys it. Only lossless copies keep it.</span></li>
+  </ul>
+</section>
+</main>
+
+<footer>
+  <div class="cols">
+    <div><b>Team TriLogy</b>Alisher Xaydarov: image handling and the menu (bmp.cpp, ui.cpp, main.cpp).<br>Zainab Bukhari: detection, encryption and embedding, testing (detect.cpp, cipher.cpp, stego.cpp).</div>
+    <div><b>Sample photos</b>From scikit-image's sample data, free to reuse.<br>Coffee: Rachel Michetti, CC0, courtesy of Pikolo Espresso Bar.<br>Cat: "Chelsea the cat", Stefan van der Walt, CC0.<br>Rocket: DSCOVR launch on Falcon 9, SpaceX, public domain.</div>
+    <div><b>Runs on your device</b>Everything happens locally in your browser: no photo, message or password leaves this page. The JavaScript uses the same payload format as the C++ tool, so images move freely between the two. RS analysis: Fridrich, Goljan and Du (2001). Chi-square attack: Westfeld and Pfitzmann (1999).</div>
+  </div>
+</footer>
+
+<button class="dock gw" id="dock" data-ghost aria-label="The ghost. Click for a hint."></button>
+<div class="bubble" id="bubble" role="status" aria-live="polite"></div>
+<canvas id="fx" aria-hidden="true"></canvas>
+<div class="toast" id="toast" role="status"></div>
+</body>
+</html>
