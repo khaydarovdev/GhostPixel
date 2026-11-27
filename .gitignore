@@ -1,0 +1,6 @@
+bin/
+build/
+*.o
+*.exe
+.vscode/
+.DS_Store
